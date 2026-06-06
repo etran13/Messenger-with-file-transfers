@@ -5,16 +5,18 @@ import os
 
 def accept_connection(portNum):
     "For server setup: Accepts and returns a connection object"
+    port_int = int(portNum)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as initialServer:
-        initialServer.bind(("10.56.2.249", portNum))
+        initialServer.bind(("10.56.2.249", port_int))
         initialServer.listen()
         conn, addr = initialServer.accept() 
         return conn
 
 def make_connection(portNum):
     "For client setup: Returns a connection object given a port number"
+    port_int = int(portNum)
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    conn.connect(("10.56.2.249", portNum)) 
+    conn.connect(("10.56.2.249", port_int)) 
     return conn
 
 #Access command line arguments
