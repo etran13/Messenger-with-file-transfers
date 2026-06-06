@@ -7,16 +7,39 @@ from queue import Queue
 # =============================================================================
 # Thread classes
 # =============================================================================
-class MessageSender():
+class MessageSender(Thread):
+    """
+    Worker thread with access to the message queue and message socket. When
+    a new message is added to the queue, it will be sent.
+    """
+    def __init__(self, sock, queue):
+        Thread.__init__(self)
+        self.sock = sock
+        self.queue = queue
+
+    def __run__(self):
+        while True:
+            message = self.q.get() 
+            socket.sendall(message.encode())
+
+class MessageReciever(Thread):
+    """
+    Worker thread that is responsible for recieving messages and printing
+    them to the screen.
+    """
+    def __init__(self, sock):
+        Thread.__init__(self)
+        self.sock = sock
+
+    def __run__(self):
+        while True:
+            data = socket.recv(1024)
+            print(f"Recieved: {data.decode()}")
+
+class FileSender(Thread):
     pass
 
-class MessageReciever():
-    pass
-
-class FileSender():
-    pass
-
-class FileReceiver():
+class FileReceiver(Thread):
     pass
 
 
@@ -45,6 +68,7 @@ def make_connection(portNum):
     return conn
 
 def printInterface():
+    "Prints the dialog for the user"
     print("Enter an option ('m', 'f', 'x'):")
     print("  (M)essage (send)")
     print("  (F)ile (request)")
@@ -71,14 +95,19 @@ else:
     f_conn = make_connection(arg_dict["-l"])
     print("Client: made")
 
-#Set up queues for messages and files
+#Instantiate queues for messages and files
 m_queue = Queue()
 f_queue = Queue()
 
 #Create and start sending and recieving threads
-m_recv = None
+m_recv = MessageReciever(m_conn)
+m_recv.start()
+
 f_recv = None
-m_send = None
+
+m_send = MessageSender(m_conn, m_queue)
+m_send.start()
+
 f_send = None
 
 #Start main dialog loop
@@ -90,10 +119,10 @@ while True:
     #Handle subsequent input
     if choice == "m":
         message = input("Enter your message: ")
-        m_queue.append(message)
+        m_queue.put(message)
     elif choice == "f":
         filename = input("Which file do you want? ")
-        f_queue.append(filename)
+        f_queue.put(filename)
     elif choice == "x":
         os._exit(0)
 
