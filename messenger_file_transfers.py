@@ -3,6 +3,7 @@ import socket
 from threading import Thread
 import os
 from queue import Queue
+import struct
 
 # =============================================================================
 # Thread classes
@@ -13,17 +14,17 @@ class MessageSender(Thread):
     a new message is added to the queue, it will be sent.
     """
     def __init__(self, sock, queue):
-        print("Sender init")
+        #print("Sender init")
         Thread.__init__(self)
         self.sock = sock
         self.queue = queue
 
     def run(self):
-        print("Send started")
+        #print("Send started")
         while True:
             message = self.queue.get() 
             self.sock.sendall(message.encode())
-            print("Message sent")
+            #print("Message sent")
 
 class MessageReciever(Thread):
     """
@@ -31,22 +32,81 @@ class MessageReciever(Thread):
     them to the screen.
     """
     def __init__(self, sock):
-        print("Recver init")
+        #print("Recver init")
         Thread.__init__(self)
         self.sock = sock
 
     def run(self):
-        print("Recv started", flush=True)
+        #print("Recv started", flush=True)
         while True:
-            print("Recv looping")
+            #print("Recv looping")
             data = self.sock.recv(1024)
             print(f"Recieved: {data.decode()}")
 
 class FileSender(Thread):
-    pass
+    """
+    Worker thread with access to the file queue and file socket. When
+    a filename is added to the queue, the thread will locate the file
+    and send it.
+    """
+    def __init__(self, sock, queue):
+        #print("Sender init")
+        Thread.__init__(self)
+        self.sock = sock
+        self.queue = queue
+
+    def run(self):
+        #print("Send started")
+        while True:
+            filename = self.queue.get()
+            self.sock.sendall(filename.encode())
+            self.send_file(filename)
+
+    def send_file(self, filename):
+        """
+        Given a filename, check if the file exists and send it over
+        the socket if it does. If the file does not exist, fail silently.
+        """
+        try:
+            file_stat= os.stat(filename)
+            if file_stat.st_size:
+                file = open(self.file_name, 'rb')
+                while True:
+                    print("Sending file...")
+                    file_bytes= file.read( 1024 )
+                    if file_bytes:
+                        self.sock.send(file_bytes)
+                    else:
+                        print("Done sending")
+                        self.sock.send("".encode())
+                        break
+                file.close()
+        except:
+            print("File sending encountered an error")
+            return
 
 class FileReceiver(Thread):
-    pass
+    """
+    Worker thread responsible for recieving file bytes and writing
+    them into a file.
+    """
+    def __init__(self, sock):
+        Thread.__init__(self)
+        self.sock = sock
+
+    def run(self):
+        while True:
+            filename = self.sock.recv
+            file = open(filename, 'wb')
+            while True:
+                print("Recieving file...")
+                file_bytes= self.sock.recv(1024)
+                if file_bytes:
+                    file.write(file_bytes)
+                else:
+                    print("Done recieving")
+                    break
+            file.close()
 
 
 # =============================================================================
