@@ -21,7 +21,7 @@ class MessageSender(Thread):
     def run(self):
         print("Send started")
         while True:
-            message = self.q.get() 
+            message = self.queue.get() 
             socket.sendall(message.encode())
             print("Message sent")
 
