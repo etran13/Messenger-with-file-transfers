@@ -4,14 +4,17 @@ import threading
 import os
 
 def accept_connection(portNum):
-    "For server setup: Accepts and returns a connection object"
+    """For server setup: Accepts and returns two connection objects:
+    one for messages and one for files"""
     print("accept_connection")
     port_int = int(portNum)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as initialServer:
         initialServer.bind(("10.56.2.249", port_int))
         initialServer.listen()
-        conn, addr = initialServer.accept() 
-        return conn
+        message_conn, addr = initialServer.accept() 
+        file_conn, addr = initialServer.accept() 
+        return (message_conn, file_conn)
+    print("accept_connection success")
 
 def make_connection(portNum):
     print("make_connection")
@@ -32,8 +35,7 @@ if len(arg_dict) == 1:
     port_number = arg_dict["-l"]
 
     #Make and accept connection for messages m and files f
-    m_conn = accept_connection(arg_dict["-l"])
-    f_conn = accept_connection(arg_dict["-l"])
+    m_conn, f_conn = accept_connection(arg_dict["-l"])
     print("Server: made")
 else:
     m_conn = make_connection(arg_dict["-l"])
