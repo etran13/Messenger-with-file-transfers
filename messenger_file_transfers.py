@@ -56,13 +56,14 @@ class FileSender(Thread):
         self.f_sock = f_sock
 
     def run(self):
-        #print("Send started")
+        print("Send started")
         while True:
             filename = self.r_sock.recv(1024).decode()
 
             #Check if file exists
             file_stat= os.stat(filename)
             if file_stat.st_size:
+                print("File exists")
                 self.f_sock.sendall("1".encode())
                 self.send_file(filename)
 
@@ -94,19 +95,21 @@ class FileReceiver(Thread):
     Worker thread responsible for recieving file bytes and writing
     them into a file.
     """
-    def __init__(self, sock, queue):
+    def __init__(self, r_sock, f_sock, queue):
         Thread.__init__(self)
-        self.sock = sock
+        self.r_sock = r_sock
+        self.f_sock = f_sock
         self.queue = queue
 
     def run(self):
         while True:
             #Send the filename to the server
             filename = self.queue.get()
-            self.sock.sendall(filename.encode())
+            print(f"requested {filename}")
+            self.r_sock.sendall(filename.encode())
 
             #Wait for server to confirm file exists- if so, recieve it
-            exists = self.sock.recv(1024).decode()
+            exists = self.f_sock.recv(1024).decode()
             if exists == "1":
                 self.recieve_file(filename)
 
@@ -114,10 +117,10 @@ class FileReceiver(Thread):
         file = open(filename, 'wb')
         while True:
             print("Recieving file...")
-            server_has_more = self.sock.recv(1024).decode()
+            server_has_more = self.f_sock.recv(1024).decode()
             if server_has_more == "1":
-                self.sock.sendall("1".encode())
-                file_bytes= self.sock.recv(1024)
+                self.f_sock.sendall("1".encode())
+                file_bytes= self.f_sock.recv(1024)
                 file.write(file_bytes)
             else:
                 print("Done recieving")
@@ -194,7 +197,7 @@ f_recv.start()
 m_send = MessageSender(m_conn, m_queue)
 m_send.start()
 
-f_send = FileReceiver(f_conn, f_queue)
+f_send = FileReceiver(r_conn, f_conn, f_queue)
 f_send.start()
 
 #Start main dialog loop
