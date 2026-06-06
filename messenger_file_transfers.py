@@ -47,42 +47,43 @@ class MessageReciever(Thread):
 
 class FileSender(Thread):
     """
-    Worker thread with access to the file queue and file socket. When
-    a filename is added to the queue, the thread will locate the file
-    and send it.
+    Sends requested files to the client.
     """
-    def __init__(self, sock, queue):
+    def __init__(self, sock):
         #print("Sender init")
         Thread.__init__(self)
         self.sock = sock
-        self.queue = queue
 
     def run(self):
         #print("Send started")
         while True:
-            filename = self.queue.get()
-            self.sock.sendall(filename.encode())
-            self.send_file(filename)
+            filename = self.sock.recv(1024).decode()
+
+            #Check if file exists
+            file_stat= os.stat(filename)
+            if file_stat.st_size:
+                self.sock.sendall("1".encode())
+                self.send_file(filename)
 
     def send_file(self, filename):
         """
-        Given a filename, check if the file exists and send it over
-        the socket if it does. If the file does not exist, fail silently.
+        Given a valid filename, send the file over the socket.
         """
         try:
-            file_stat= os.stat(filename)
-            if file_stat.st_size:
-                file = open(self.file_name, 'rb')
-                while True:
-                    print("Sending file...")
-                    file_bytes= file.read( 1024 )
-                    if file_bytes:
+            file = open(filename, 'rb')
+            while True:
+                print("Sending file...")
+                file_bytes= file.read(1024)
+                if file_bytes:
+                    self.sock.send("1".encode())
+                    client_is_ready = self.sock.recv(1024).decode()
+                    if client_is_ready == "1":
                         self.sock.send(file_bytes)
-                    else:
-                        print("Done sending")
-                        self.sock.send("".encode())
-                        break
-                file.close()
+                else:
+                    print("Done sending")
+                    self.sock.send("0".encode())
+                    break
+            file.close()
         except:
             print("File sending encountered an error")
             return
@@ -92,23 +93,36 @@ class FileReceiver(Thread):
     Worker thread responsible for recieving file bytes and writing
     them into a file.
     """
-    def __init__(self, sock):
+    def __init__(self, sock, queue):
         Thread.__init__(self)
         self.sock = sock
+        self.queue = queue
 
     def run(self):
         while True:
-            filename = self.sock.recv
-            file = open(filename, 'wb')
-            while True:
-                print("Recieving file...")
+            #Send the filename to the server
+            filename = self.queue.get()
+            self.sock.sendall(filename.encode())
+
+            #Wait for server to confirm file exists- if so, recieve it
+            exists = self.sock.recv(1024).decode()
+            if exists == "1":
+                self.recieve_file(filename)
+
+    def recieve_file(self, filename):
+        file = open(filename, 'wb')
+        while True:
+            print("Recieving file...")
+            server_has_more = self.sock.recv(1024).decode()
+            if server_has_more == "1":
+                self.sock.sendall("1".encode())
                 file_bytes= self.sock.recv(1024)
-                if file_bytes:
-                    file.write(file_bytes)
-                else:
-                    print("Done recieving")
-                    break
-            file.close()
+                file.write(file_bytes)
+            else:
+                print("Done recieving")
+                break
+        file.close()
+
 
 
 # =============================================================================
