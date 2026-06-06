@@ -1,8 +1,28 @@
 import sys
 import socket
-import threading
+from threading import Thread
 import os
-from collections import deque
+from queue import Queue
+
+# =============================================================================
+# Thread classes
+# =============================================================================
+class MessageSender():
+    pass
+
+class MessageReciever():
+    pass
+
+class FileSender():
+    pass
+
+class FileReceiver():
+    pass
+
+
+# =============================================================================
+# Helper functions
+# =============================================================================
 
 def accept_connection(portNum):
     """For server setup: Accepts and returns two connection objects:
@@ -30,6 +50,10 @@ def printInterface():
     print("  (F)ile (request)")
     print(" e(X)it")
 
+# =============================================================================
+# Main program
+# =============================================================================
+
 #Access command line arguments
 arguments = sys.argv[1:]
 arg_dict = {}
@@ -48,8 +72,14 @@ else:
     print("Client: made")
 
 #Set up queues for messages and files
-m_queue = deque()
-f_queue = deque()
+m_queue = Queue()
+f_queue = Queue()
+
+#Create and start sending and recieving threads
+m_recv = None
+f_recv = None
+m_send = None
+f_send = None
 
 #Start main dialog loop
 while True:
@@ -59,10 +89,10 @@ while True:
 
     #Handle subsequent input
     if choice == "m":
-        message = input("Enter your message:")
+        message = input("Enter your message: ")
         m_queue.append(message)
     elif choice == "f":
-        filename = input("Which file do you want?")
+        filename = input("Which file do you want? ")
         f_queue.append(filename)
     elif choice == "x":
         os._exit(0)
