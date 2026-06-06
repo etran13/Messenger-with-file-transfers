@@ -21,6 +21,7 @@ class MessageSender(Thread):
         while True:
             message = self.q.get() 
             socket.sendall(message.encode())
+            print("Message sent")
 
 class MessageReciever(Thread):
     """
@@ -32,7 +33,9 @@ class MessageReciever(Thread):
         self.sock = sock
 
     def __run__(self):
+        print("Recv started")
         while True:
+            print("Recv looping")
             data = socket.recv(1024)
             print(f"Recieved: {data.decode()}")
 
