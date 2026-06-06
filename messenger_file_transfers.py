@@ -14,7 +14,7 @@ class MessageSender(Thread):
     """
     def __init__(self, sock, queue):
         print("Sender init")
-        super().__init__(self)
+        Thread.__init__(self)
         self.sock = sock
         self.queue = queue
 
@@ -32,7 +32,7 @@ class MessageReciever(Thread):
     """
     def __init__(self, sock):
         print("Recver init")
-        super().__init__(self)
+        Thread.__init__(self)
         self.sock = sock
 
     def run(self):
