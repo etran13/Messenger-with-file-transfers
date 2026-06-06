@@ -136,7 +136,7 @@ class FileReceiver(Thread):
 def accept_connection(portNum):
     """For server setup: Accepts and returns three connection objects:
     one for messages, one for requests and one for files"""
-    print("accept_connection")
+    # print("accept_connection")
     port_int = int(portNum)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as initialServer:
         initialServer.bind(("10.56.2.249", port_int))
@@ -148,7 +148,7 @@ def accept_connection(portNum):
 
 def make_connection(portNum):
     "For client setup: Returns a connection object given a port number"
-    print("make_connection")
+    # print("make_connection")
     port_int = int(portNum)
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     conn.connect(("10.56.2.249", port_int)) 
@@ -175,13 +175,13 @@ if len(arg_dict) == 1:
     #Do server setup
     port_number = arg_dict["-l"]
     m_conn, r_conn, f_conn = accept_connection(arg_dict["-l"])
-    print("Server: made")
+    # print("Server: made")
 else:
     #Do client setup
     m_conn = make_connection(arg_dict["-l"])
     r_conn = make_connection(arg_dict["-l"])
     f_conn = make_connection(arg_dict["-l"])
-    print("Client: made")
+    #print("Client: made")
 
 #Instantiate queues for messages and files
 m_queue = Queue()
