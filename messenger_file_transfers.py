@@ -2,6 +2,7 @@ import sys
 import socket
 import threading
 import os
+from collections import deque
 
 def accept_connection(portNum):
     """For server setup: Accepts and returns two connection objects:
@@ -14,15 +15,20 @@ def accept_connection(portNum):
         message_conn, addr = initialServer.accept() 
         file_conn, addr = initialServer.accept() 
         return (message_conn, file_conn)
-    print("accept_connection success")
 
 def make_connection(portNum):
-    print("make_connection")
     "For client setup: Returns a connection object given a port number"
+    print("make_connection")
     port_int = int(portNum)
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     conn.connect(("10.56.2.249", port_int)) 
     return conn
+
+def printInterface():
+    print("Enter an option ('m', 'f', 'x'):")
+    print("  (M)essage (send)")
+    print("  (F)ile (request)")
+    print(" e(X)it")
 
 #Access command line arguments
 arguments = sys.argv[1:]
@@ -33,13 +39,32 @@ for i in range(0, len(arguments), 2):
 if len(arg_dict) == 1:
     #Do server setup
     port_number = arg_dict["-l"]
-
-    #Make and accept connection for messages m and files f
     m_conn, f_conn = accept_connection(arg_dict["-l"])
     print("Server: made")
 else:
+    #Do client setup
     m_conn = make_connection(arg_dict["-l"])
     f_conn = make_connection(arg_dict["-l"])
     print("Client: made")
+
+#Set up queues for messages and files
+m_queue = deque()
+f_queue = deque()
+
+#Start main dialog loop
+while True:
+    #Get input
+    printInterface()
+    choice = input("")
+
+    #Handle subsequent input
+    if choice == "m":
+        message = input("Enter your message:")
+        m_queue.append(message)
+    elif choice == "f":
+        filename = input("Which file do you want?")
+        f_queue.append(filename)
+    elif choice == "x":
+        os._exit(0)
 
 print(arg_dict)
