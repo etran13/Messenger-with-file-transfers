@@ -185,12 +185,14 @@ f_queue = Queue()
 m_recv = MessageReciever(m_conn)
 m_recv.start()
 
-f_recv = None
+f_recv = FileSender(f_conn)
+f_recv.start()
 
 m_send = MessageSender(m_conn, m_queue)
 m_send.start()
 
-f_send = None
+f_send = FileReceiver(f_conn, f_queue)
+f_send.start()
 
 #Start main dialog loop
 while True:
