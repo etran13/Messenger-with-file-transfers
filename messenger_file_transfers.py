@@ -5,6 +5,7 @@ import os
 
 def accept_connection(portNum):
     "For server setup: Accepts and returns a connection object"
+    print("accept_connection")
     port_int = int(portNum)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as initialServer:
         initialServer.bind(("10.56.2.249", port_int))
@@ -13,6 +14,7 @@ def accept_connection(portNum):
         return conn
 
 def make_connection(portNum):
+    print("make_connection")
     "For client setup: Returns a connection object given a port number"
     port_int = int(portNum)
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
