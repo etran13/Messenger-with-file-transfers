@@ -22,7 +22,7 @@ class MessageSender(Thread):
         print("Send started")
         while True:
             message = self.queue.get() 
-            socket.sendall(message.encode())
+            self.sock.sendall(message.encode())
             print("Message sent")
 
 class MessageReciever(Thread):
@@ -39,7 +39,7 @@ class MessageReciever(Thread):
         print("Recv started", flush=True)
         while True:
             print("Recv looping")
-            data = socket.recv(1024)
+            data = self.sock.recv(1024)
             print(f"Recieved: {data.decode()}")
 
 class FileSender(Thread):
@@ -130,6 +130,8 @@ while True:
         filename = input("Which file do you want? ")
         f_queue.put(filename)
     elif choice == "x":
+        m_conn.close()
+        f_conn.close()
         os._exit(0)
 
 print(arg_dict)
