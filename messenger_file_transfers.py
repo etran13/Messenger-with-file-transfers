@@ -42,6 +42,7 @@ class MessageReciever(Thread):
             data = self.sock.recv(1024)
             if not data:
                 self.sock.close()
+                print("Closing your sockets... goodbye")
                 os._exit(0)
             print(f"Recieved: {data.decode()}")
 
@@ -215,5 +216,7 @@ while True:
         f_queue.put(filename)
     elif choice == "x":
         m_conn.close()
+        r_conn.close()
         f_conn.close()
+        print("Closing your sockets... goodbye")
         os._exit(0)
