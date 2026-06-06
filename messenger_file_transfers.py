@@ -39,8 +39,10 @@ class MessageReciever(Thread):
     def run(self):
         #print("Recv started", flush=True)
         while True:
-            #print("Recv looping")
             data = self.sock.recv(1024)
+            if not data:
+                self.sock.close()
+                os._exit(0)
             print(f"Recieved: {data.decode()}")
 
 class FileSender(Thread):
