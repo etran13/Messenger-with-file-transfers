@@ -12,4 +12,8 @@ for i in range(0, len(arguments), 2):
 if len(arg_dict) == 1:
     #Do server setup
     port_number = arg_dict["-l"]
-    
+else:
+    #Do client setup
+    pass
+
+print(arg_dict)
