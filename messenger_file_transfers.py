@@ -56,14 +56,14 @@ class FileSender(Thread):
         self.f_sock = f_sock
 
     def run(self):
-        print("Send started")
+        # print("Send started")
         while True:
             filename = self.r_sock.recv(1024).decode()
 
             #Check if file exists
             file_stat= os.stat(filename)
             if file_stat.st_size:
-                print("File exists")
+                # print("File exists")
                 self.f_sock.sendall("1".encode())
                 self.send_file(filename)
 
@@ -74,7 +74,7 @@ class FileSender(Thread):
         try:
             file = open(filename, 'rb')
             while True:
-                print("Sending file...")
+                # print("Sending file...")
                 file_bytes= file.read(1024)
                 if file_bytes:
                     self.f_sock.send("1".encode())
@@ -82,7 +82,7 @@ class FileSender(Thread):
                     if client_is_ready == "1":
                         self.f_sock.send(file_bytes)
                 else:
-                    print("Done sending")
+                    # print("Done sending")
                     self.f_sock.send("0".encode())
                     break
             file.close()
@@ -217,5 +217,3 @@ while True:
         m_conn.close()
         f_conn.close()
         os._exit(0)
-
-print(arg_dict)
