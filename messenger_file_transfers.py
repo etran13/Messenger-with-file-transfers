@@ -13,11 +13,13 @@ class MessageSender(Thread):
     a new message is added to the queue, it will be sent.
     """
     def __init__(self, sock, queue):
+        print("Sender init")
         Thread.__init__(self)
         self.sock = sock
         self.queue = queue
 
     def __run__(self):
+        print("Send started")
         while True:
             message = self.q.get() 
             socket.sendall(message.encode())
@@ -29,6 +31,7 @@ class MessageReciever(Thread):
     them to the screen.
     """
     def __init__(self, sock):
+        print("Recver init")
         Thread.__init__(self)
         self.sock = sock
 
