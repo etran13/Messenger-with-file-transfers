@@ -14,11 +14,11 @@ class MessageSender(Thread):
     """
     def __init__(self, sock, queue):
         print("Sender init")
-        Thread.__init__(self)
+        super().__init__(self)
         self.sock = sock
         self.queue = queue
 
-    def __run__(self):
+    def run(self):
         print("Send started")
         while True:
             message = self.q.get() 
@@ -32,11 +32,11 @@ class MessageReciever(Thread):
     """
     def __init__(self, sock):
         print("Recver init")
-        Thread.__init__(self)
+        super().__init__(self)
         self.sock = sock
 
-    def __run__(self):
-        print("Recv started")
+    def run(self):
+        print("Recv started", flush=True)
         while True:
             print("Recv looping")
             data = socket.recv(1024)
